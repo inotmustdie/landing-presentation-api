@@ -12,6 +12,6 @@ Route::get('/', function () {
 });
 
 Route::view('/docs', 'docs');
-Route::get('/openapi.json', fn () => response()->file(public_path('docs/openapi.json'), [
+Route::get('/openapi.json', fn () => response()->file(resource_path('docs/openapi.json'), [
     'Content-Type' => 'application/json',
 ]));
