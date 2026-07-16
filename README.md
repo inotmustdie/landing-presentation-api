@@ -15,6 +15,13 @@ Backend-сервис для лендинг-презентации разрабо
 
 ## Запуск
 
+Проект можно запускать двумя способами:
+
+- обычный локальный запуск через `PHP/Composer`
+- универсальный запуск через `Docker`
+
+## Запуск без Docker
+
 1. Установить зависимости:
 
 ```bash
@@ -38,6 +45,45 @@ php artisan serve
 
 ```text
 http://127.0.0.1:8000
+```
+
+## Запуск через Docker
+
+Требования:
+
+- `Docker`
+- `Docker Compose`
+
+Быстрый старт:
+
+```bash
+docker compose up --build
+```
+
+После запуска будут доступны:
+
+- API: `http://127.0.0.1:8080`
+- Swagger UI: `http://127.0.0.1:8080/docs`
+- OpenAPI JSON: `http://127.0.0.1:8080/openapi.json`
+- Mailpit UI: `http://127.0.0.1:8025`
+
+Что делает контейнер при старте:
+
+- копирует `.env.example` в `.env`, если `.env` отсутствует
+- устанавливает `composer`-зависимости, если папка `vendor` ещё не создана
+- генерирует `APP_KEY`, если ключ отсутствует
+- подготавливает папки `storage` и `bootstrap/cache`
+
+Остановка контейнеров:
+
+```bash
+docker compose down
+```
+
+Пересборка после изменений в Docker-конфигурации:
+
+```bash
+docker compose up --build --force-recreate
 ```
 
 ## Переменные окружения
@@ -66,6 +112,8 @@ OPENAI_TIMEOUT=12
 ```
 
 Для реальной почтовой отправки можно переключить `MAIL_MAILER` на `smtp` и заполнить SMTP-параметры.
+
+Для Docker-режима по умолчанию используется `Mailpit`, поэтому письма можно смотреть локально через веб-интерфейс без внешнего SMTP.
 
 ## Технологии
 
@@ -222,6 +270,12 @@ curl http://127.0.0.1:8000/api/metrics
 php artisan test
 ```
 
+Через Docker:
+
+```bash
+docker compose exec app php artisan test
+```
+
 Покрыты сценарии:
 
 - успешная отправка формы
@@ -234,3 +288,12 @@ php artisan test
 Проект можно задеплоить на `Render`, `Railway`, `AnyHost` или обычный VPS с `PHP 8.1+`.
 
 Если внешний SMTP недоступен, для демо можно оставить `MAIL_MAILER=log`, и письма будут фиксироваться в логах Laravel без падения сценария.
+
+## Docker-файлы
+
+В проект добавлены:
+
+- `Dockerfile` — PHP 8.1 FPM-образ приложения
+- `docker-compose.yml` — сервисы `app`, `nginx`, `mailpit`
+- `docker/app/entrypoint.sh` — автоинициализация окружения
+- `docker/nginx/default.conf` — конфигурация nginx для Laravel

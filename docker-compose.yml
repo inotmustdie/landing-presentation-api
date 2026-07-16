@@ -1,0 +1,57 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: landing-presentation-app
+    working_dir: /var/www
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+      LOG_CHANNEL: stack
+      CACHE_DRIVER: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+      DB_CONNECTION: sqlite
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_USERNAME: null
+      MAIL_PASSWORD: null
+      MAIL_ENCRYPTION: null
+      MAIL_FROM_ADDRESS: noreply@example.com
+      MAIL_FROM_NAME: InternetLab Landing API
+      CONTACT_OWNER_EMAIL: owner@example.com
+      OPENAI_ENABLED: ${OPENAI_ENABLED:-true}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      OPENAI_TIMEOUT: ${OPENAI_TIMEOUT:-12}
+      CONTACT_RATE_LIMIT_MAX_ATTEMPTS: ${CONTACT_RATE_LIMIT_MAX_ATTEMPTS:-5}
+      CONTACT_RATE_LIMIT_DECAY_SECONDS: ${CONTACT_RATE_LIMIT_DECAY_SECONDS:-600}
+    volumes:
+      - .:/var/www
+      - composer_vendor:/var/www/vendor
+    depends_on:
+      - mailpit
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: landing-presentation-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  mailpit:
+    image: axllent/mailpit:v1.26
+    container_name: landing-presentation-mailpit
+    ports:
+      - "8025:8025"
+
+volumes:
+  composer_vendor:
