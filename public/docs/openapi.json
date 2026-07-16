@@ -1,0 +1,131 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Landing Presentation API",
+    "version": "1.0.0",
+    "description": "API for contact form processing with AI enrichment, email notifications, metrics and rate limiting."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000"
+    }
+  ],
+  "paths": {
+    "/api/contact": {
+      "post": {
+        "summary": "Submit contact form",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContactRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Too many requests"
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service status"
+          }
+        }
+      }
+    },
+    "/api/metrics": {
+      "get": {
+        "summary": "Get contact metrics",
+        "responses": {
+          "200": {
+            "description": "Metrics payload"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ContactRequest": {
+        "type": "object",
+        "required": ["name", "phone", "email", "comment"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Ivan Petrov"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+79991234567"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "ivan@example.com"
+          },
+          "comment": {
+            "type": "string",
+            "example": "Hello! I would like to discuss AI integration for a landing page."
+          }
+        }
+      },
+      "ContactResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "contact_id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "sentiment": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "ai_provider": {
+                "type": "string"
+              },
+              "fallback_used": {
+                "type": "boolean"
+              },
+              "fallback_reason": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
